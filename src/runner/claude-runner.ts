@@ -51,6 +51,8 @@ export class ClaudeRunner {
     if (options.sessionId) args.push('--resume', options.sessionId);
     args.push(options.prompt);
 
+    console.log(`[Claude <= user]\n${options.prompt}`);
+
     const child = spawn(this.claudeBin, args, {
       cwd: options.cwd,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -79,14 +81,19 @@ export class ClaudeRunner {
         const type = event.type;
         if (type === 'assistant' && Array.isArray(event.message?.content)) {
           for (const block of event.message.content) {
-            if (block.type === 'text' && typeof block.text === 'string') await options.onText(block.text);
+              if (block.type === 'text' && typeof block.text === 'string') {
+                console.log(`[Claude => gateway]\n${block.text}`);
+                await options.onText(block.text);
+              }
             if (block.type === 'tool_use' && options.onTool) {
               await options.onTool(block.name || 'tool', block.id || '', 'running');
             }
           }
         }
         if (type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-          await options.onText(event.delta.text || '');
+          const text = event.delta.text || '';
+          if (text) console.log(`[Claude => gateway]\n${text}`);
+          await options.onText(text);
         }
       } catch (err) {
         this.logger.debug({ err, line }, 'Failed to parse Claude stream line');

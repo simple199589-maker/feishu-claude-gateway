@@ -12,7 +12,7 @@ Small Feishu-to-Claude Code remote I/O gateway.
 
 Claude Code continues to own project context, skills, MCP, settings, and session files inside each workspace.
 
-## Quick start
+## Development
 
 ```bash
 cp .env.example .env
@@ -20,17 +20,7 @@ npm install
 npm run dev
 ```
 
-The gateway uses Feishu WebSocket events, so it does not need a public HTTP callback URL.
-
-Local admin UI is available at:
-
-```text
-http://127.0.0.1:3001/admin
-```
-
-It writes `.env`; restart the process to apply Feishu/WebSocket changes.
-
-## PM2
+## Production
 
 Build before starting or restarting the production process:
 
@@ -44,6 +34,12 @@ Start with PM2:
 pm2 start ecosystem.config.cjs
 ```
 
+If the process is already running, restart it with:
+
+```bash
+pm2 restart feishu-claude-gateway --update-env
+```
+
 Watch realtime logs:
 
 ```bash
@@ -54,7 +50,6 @@ Common management commands:
 
 ```bash
 pm2 status feishu-claude-gateway
-pm2 restart feishu-claude-gateway --update-env
 pm2 stop feishu-claude-gateway
 ```
 

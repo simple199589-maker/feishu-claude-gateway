@@ -91,6 +91,7 @@ export class Gateway {
 
     try {
       state.status = 'running';
+      console.log('[gateway => Feishu] running');
       const result = await this.runner.run({
         prompt: msg.text,
         cwd: session.workspace,
@@ -111,10 +112,12 @@ export class Gateway {
       state.model = result.model;
       state.status = abortController.signal.aborted ? 'error' : 'complete';
       state.errorMessage = abortController.signal.aborted ? 'Stopped by user' : undefined;
+      console.log(`[gateway => Feishu] ${state.status}`);
     } catch (err) {
       this.logger.error({ err }, 'Claude run failed');
       state.status = 'error';
       state.errorMessage = err instanceof Error ? err.message : String(err);
+      console.log('[gateway => Feishu] error');
     } finally {
       session.running = undefined;
       state.durationMs = Date.now() - startedAt;
