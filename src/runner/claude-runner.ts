@@ -35,6 +35,10 @@ type ClaudeStreamEvent = {
   };
 };
 
+const NON_INTERACTIVE_PROMPT = `
+
+非交互环境约束：你正通过飞书网关和 claude -p 运行，无法接收本地浏览器打开确认、权限确认或其他交互式追问。不要询问是否打开浏览器、不要请求打开本地 URL、不要发起任何需要用户点击 Yes/No 的交互问题；遇到这类可选能力时默认选择 No，并改用文字或 Markdown 说明。`;
+
 export class ClaudeRunner {
   constructor(
     private claudeBin: string,
@@ -42,6 +46,8 @@ export class ClaudeRunner {
   ) {}
 
   async run(options: ClaudeRunOptions): Promise<ClaudeRunResult> {
+    const prompt = `${options.prompt}${NON_INTERACTIVE_PROMPT}`;
+
     const args = [
       '-p',
       '--output-format',
@@ -49,9 +55,9 @@ export class ClaudeRunner {
       '--verbose',
     ];
     if (options.sessionId) args.push('--resume', options.sessionId);
-    args.push(options.prompt);
+    args.push(prompt);
 
-    console.log(`[Claude <= user]\n${options.prompt}`);
+    console.log(`[Claude <= user]\n${prompt}`);
 
     const child = spawn(this.claudeBin, args, {
       cwd: options.cwd,
